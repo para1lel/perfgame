@@ -1,0 +1,30 @@
+# 评测主环境：CUDA C++ / TileLang / CuTe DSL
+#
+# 与 environment-tirx.yml 不可合并：TileLang 钉死 apache-tvm-ffi<0.1.13，
+# 而 apache-tvm(TIRx) 要求 >=0.1.14.post0。详见 docs/deployment.md。
+name: perfgame-main
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - cuda-toolkit=13.0.*
+  - pip:
+      # 评测
+      - torch==2.13.0
+      - tilelang==0.1.15
+      - nvidia-cutlass-dsl==4.8.1
+      - nvidia-cutlass-dsl[sass]
+      - cuda-python>=11.8
+      - numpy
+      - nvidia-ml-py
+      # Web
+      - fastapi
+      - uvicorn[standard]
+      - pydantic>=2
+      - sqlalchemy
+      - redis
+      - httpx
+      - python-jose
+      - pyyaml
+      - markdown-it-py

@@ -1,0 +1,19 @@
+[Unit]
+Description=PerfGame API
+After=network.target
+
+[Service]
+Type=simple
+User=perfgame
+Group=perfgame
+WorkingDirectory=/opt/perfgame
+EnvironmentFile=/etc/perfgame/env
+ExecStart=/opt/perfgame/.conda/envs/perfgame-main/bin/uvicorn \
+          backend.main:app --host 127.0.0.1 --port 8000 --workers 2
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

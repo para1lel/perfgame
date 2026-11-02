@@ -1,0 +1,22 @@
+[Unit]
+Description=PerfGame evaluation worker (GPU %i)
+After=network.target
+
+[Service]
+Type=simple
+User=perfgame
+Group=perfgame
+WorkingDirectory=/opt/perfgame
+EnvironmentFile=/etc/perfgame/env
+# 只让这个进程看见第 %i 张卡；worker 内部设备序号恒为 0
+Environment=CUDA_VISIBLE_DEVICES=%i
+Environment=PERFGAME_CONDA_MAIN=/opt/perfgame/.conda/envs/perfgame-main
+Environment=PERFGAME_CONDA_TIRX=/opt/perfgame/.conda/envs/perfgame-tirx
+ExecStart=/opt/perfgame/.conda/envs/perfgame-main/bin/python -m evaluator.worker --gpu %i
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

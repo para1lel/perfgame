@@ -1,0 +1,34 @@
+# 数据目录内容全部可重建，不进版本控制
+data/
+
+# 第三方源码与头文件，由 make setup 拉取
+third_party/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+frontend/dist/
+frontend/.vite/
+
+# 本地配置
+.env
+deploy/env
+
+# 编辑器与系统
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# 评测产物如果在项目内
+*.ncu-rep
+*.cubin
+*.ptx
+*.fatbin

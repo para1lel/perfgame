@@ -1,0 +1,51 @@
+slug: matmul-bf16
+title: BF16 矩阵乘法
+category: matmul
+difficulty: medium
+summary: C = A @ B，BF16 输入输出，FP32 累加。同时受算力与带宽约束。
+
+description: |
+  给定 A (M×K) 与 B (K×N)，计算 C = A @ B。输入输出均为 BF16，内部以 FP32 累加。
+
+  ```python
+  def reference(a, b):
+      return (a.double() @ b.double()).float()
+  ```
+
+  参考实现内部用 FP64 累加再转回 FP32——这不是被测 kernel 的要求，
+  只是为了让 ground truth 本身足够准（长 K 的 BF16 逐元素累加误差会接近容差）。
+
+## 计算量与访存量
+
+  - FLOPs：`2·M·N·K`，走 BF16 张量核
+  - 读：`A` 为 `2MK` 字节、`B` 为 `2KN` 字节；写：`C` 为 `2MN` 字节
+
+  分数取访存时间与计算时间的较大者。大 shape 时是计算 bound，
+  小 shape 时 launch 与 tail 处理占主导。
+
+## 提示
+
+  - Hopper 上 128×128×64 的 tile 是常见起点；用 TMA 做加载。
+  - `sm_90a` 才能用 WGMMA，编译时已由评测器指定。
+  - 小 shape 别用大 tile，浪费的边界计算会压垮分数。
+
+signature:
+  inputs:
+    - { name: A, shape: [M, K], dtype: bfloat16, layout: contiguous }
+    - { name: B, shape: [K, N], dtype: bfloat16, layout: contiguous }
+  outputs:
+    - { name: C, shape: [M, N], dtype: bfloat16 }
+
+test_cases:
+  - { name: small,  shape: { M: 256,  K: 256,  N: 256  }, seed: 31 }
+  - { name: medium, shape: { M: 1024, K: 1024, N: 1024 }, seed: 32 }
+  - { name: large,  shape: { M: 4096, K: 4096, N: 4096 }, seed: 33 }
+
+shadow_shape: { M: 1536, K: 768, N: 2048 }
+shadow_seed: 98
+
+tolerance:
+  elementwise: { atol: 1.0e-2, rtol: 1.0e-2, min_correct_ratio: 0.99 }
+  cosine_similarity: { min: 0.999 }
+
+input_generator: normal

@@ -1,0 +1,17 @@
+# TIRx 评测环境。
+#
+# 独立于 environment-main.yml：TileLang 与 apache-tvm 对 apache-tvm-ffi
+# 的版本区间不相交。此环境只跑 evaluator 子进程，不需要 Web 依赖。
+name: perfgame-tirx
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - cuda-toolkit=13.0.*
+  - pip:
+      - apache-tvm==0.27.0.post1
+      - apache-tvm[torch]
+      - torch==2.13.0
+      - numpy
+      - nvidia-ml-py

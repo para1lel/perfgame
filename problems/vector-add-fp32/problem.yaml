@@ -1,0 +1,47 @@
+slug: vector-add-fp32
+title: FP32 向量加法
+category: elementwise
+difficulty: easy
+summary: C = A + B，FP32，纯带宽 bound，用来验证评测链路。
+
+description: |
+  给定两个长度为 N 的 FP32 向量 A、B，计算 C = A + B。
+
+  ```python
+  def reference(a, b):
+      return a + b
+  ```
+
+  ## 计算量与访存量
+
+  - FLOPs：`N`（一次加法），用 CUDA core 的 FP32 管线，不计张量核
+  - 读：`A` 与 `B` 各 `4N` 字节；写：`C` 为 `4N` 字节，合计 `12N`
+
+  这是纯带宽 bound 的题目：计算量可以忽略，分数完全由访存效率决定。
+  达标时间按 HBM 峰值 2 TB/s 计算。N = 64M 时约为 0.4 ms。
+
+## 提示
+
+  - 用 `float4` 向量化加载，每次读写 16 字节。
+  - 一维 grid-stride loop 通常比"一个线程一个元素"更快，因为 launch 配置更容易调好。
+
+signature:
+  inputs:
+    - { name: A, shape: [N], dtype: float32, layout: contiguous }
+    - { name: B, shape: [N], dtype: float32, layout: contiguous }
+  outputs:
+    - { name: C, shape: [N], dtype: float32 }
+
+test_cases:
+  - { name: small,  shape: { N: 1048576 },   seed: 21 }
+  - { name: medium, shape: { N: 16777216 },  seed: 22 }
+  - { name: large,  shape: { N: 67108864 },  seed: 23 }
+
+shadow_shape: { N: 12582912 }
+shadow_seed: 97
+
+tolerance:
+  elementwise: { atol: 1.0e-6, rtol: 1.0e-6, min_correct_ratio: 1.0 }
+  cosine_similarity: { min: 0.99999 }
+
+input_generator: normal

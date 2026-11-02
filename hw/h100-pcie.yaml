@@ -1,0 +1,24 @@
+name: H100 PCIe
+arch: sm_90
+arch_suffix: sm_90a
+device_name_match: "NVIDIA H100 PCIe"
+
+# 标称峰值，稠密（非稀疏）。来源：NVIDIA H100 Tensor Core GPU 数据表
+# https://resources.nvidia.com/en-us-hopper-architecture/nvidia-tensor-core-gpu-datasheet
+bandwidth:
+  hbm_bytes_per_s: 2.0e12
+
+flops:
+  fp64: 24.0e12
+  fp32: 48.0e12
+  tf32: 400.0e12
+  bf16: 800.0e12
+  fp16: 800.0e12
+  fp8: 1600.0e12
+  int8: 1600.0e12
+  # fp4: Hopper 不支持，键缺失即表示不可用
+
+l2_bytes: 50000000
+sm_count: 114
+clock_sm_mhz: 1755
+clock_mem_mhz: 1593
